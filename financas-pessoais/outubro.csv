@@ -1,0 +1,12 @@
+Data,Descrição,Valor,Forma
+01,Padaria,16.63,Crédito
+01,Cafeteria,37.52,Crédito
+02,Restaurante,79.80,Crédito
+03,Mercado,212.80,Crédito
+08,Combustível,80,Crédito
+05,Trade,109.34,Depósito
+06,Condomínio,432.03,Débito
+10,Cartão,478,Débito
+11,Energia,44.14,Débito
+11,Internet,99.90,Débito
+14,Aluguel,704,Débito
