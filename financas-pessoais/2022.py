@@ -1,15 +1,3 @@
-#+title: Finanças pessoais 2022
-#+author: Max Jauregui
-#+language: pt_BR
-#+options: toc:2
-
-* Análise mensal
-
-** Outubro
-
-*** Saldo anterior
-
-#+begin_src python :session :exports none :tangle yes
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -38,13 +26,7 @@ def classe(x):
     return y
 
 saldo = 3472.72
-#+end_src
 
-O saldo anterior nas contas bancárias é R$ src_python[:session]{saldo}
-
-*** Tabela de gastos e ingressos
-
-#+begin_src python :session :exports results :tangle yes
 outubro = pd.read_csv("outubro.csv")
 n = len(outubro)
 data = pd.Series(["2022-10-" for i in range(n)]) #prefixos para datas
@@ -52,39 +34,21 @@ data = data.str.cat(outubro.Data.astype("string")) #data com prefixo mas ainda c
 outubro.Data = data.astype("datetime64") #data como datetime64
 outubro = outubro.sort_values(by="Data")
 outubro
-#+end_src
 
-*** Classificação por forma de pagamento
-
-*Crédito:* Gastos realizados usando cartão de crédito
-
-*Débito:* Gastos realizados via PIX, pagamento de boleto, transferência bancária ou cartão de débito.
-
-*Depósitos:* Ingressos de fontes diversas.
-
-#+begin_src python :session :exports results :tangle yes
 forma = outubro.groupby("Forma").sum() #Valor envolvido em cada forma de pagamento
 forma
-#+end_src
 
-#+begin_src python :session :results file :exports results :tangle yes
 forma.plot(kind="bar", title="Valor por forma de pagamento", ylabel="R$", xlabel="", legend=False)
 plt.tick_params(labelrotation=0)
 fname = "outubro-forma.png"
 plt.savefig(fname)
 plt.close()
 fname # retorna ao org
-#+end_src
 
-*** Classificação dos gastos e ingressos
-
-#+begin_src python :session :exports results :tangle yes
 outubro["Classe"] = outubro.Descrição.apply(classe) #Aplica função classe à Descrição
 classifica = outubro.groupby(by="Classe").sum() #Valor envolvido em cada classe
 classifica
-#+end_src
 
-#+begin_src python :session :results file :exports results :tangle yes
 classifica.drop(["Renda extra", "Fatura do cartão"]).plot(kind="barh", title="Valor gasto por classe", legend=False)
 plt.xlabel("R$")
 plt.ylabel("")
@@ -93,13 +57,6 @@ fname = "outubro-classe.png"
 plt.savefig(fname)
 plt.close()
 fname
-#+end_src
 
-*** Saldo posterior
-
-#+begin_src python :session :exports none :tangle yes
 saldo = saldo + forma.Valor["Depósito"] - forma.Valor["Débito"]
 saldo
-#+end_src
-
-O saldo posterior nas contas bancárias é R$ src_python[:session]{saldo}
