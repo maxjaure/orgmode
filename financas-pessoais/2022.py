@@ -60,3 +60,7 @@ fname
 
 saldo = saldo + forma.Valor["Depósito"] - forma.Valor["Débito"]
 saldo
+
+if saldo<0:
+    alerta = "ATENÇÃO! Há gastos futuros que ainda precisam ser pagos."
+    alerta

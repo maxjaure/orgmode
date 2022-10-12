@@ -103,3 +103,9 @@ saldo
 #+end_src
 
 O saldo posterior nas contas bancárias é R$ src_python[:session]{saldo}
+
+#+begin_src python :session :exports results :tangle yes
+if saldo<0:
+    alerta = "ATENÇÃO! Há gastos futuros que ainda precisam ser pagos."
+    alerta
+#+end_src
