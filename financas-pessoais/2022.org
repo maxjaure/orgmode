@@ -5,10 +5,6 @@
 
 * Análise mensal
 
-** Outubro
-
-*** Saldo anterior
-
 #+begin_src python :session :exports none :tangle yes
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,23 +16,48 @@ def classe(x):
     elif x in ["Restaurante", "Cafeteria"]:
         y = "Restaurante/Cafeteria"
  
-    elif x in ["Combustível"]:
+    elif x in ["Combustível", "Seguro do carro"]:
         y = "Transporte"
  
-    elif x in ["Aluguel", "Condomínio", "Energia", "Internet"]:
+    elif x in ["Aluguel", "Condomínio", "Celular", "Energia", "Internet"]:
         y = "Moradia"
+ 
+    elif x in ["Medicamentos"]:
+        y = "Saúde"
+ 
+    elif "Plano de saúde" in x:
+        y = "Saúde"
+ 
+    elif x in ["Cabeleireiro", "Natura"]:
+        y = "Cuidado pessoal"
  
     elif x[:6] == "Cartão":
         y = "Fatura do cartão"
  
-    elif x in ["Cashback", "Dividendos", "Juros", "Trade"]:
+    elif x in ["DARF", "IRRF"]:
+        y = "Impostos"
+ 
+    elif x == "Salário":
+        y = "Salário"
+ 
+    elif x in ["Cashback", "Dividendos", "Juros", "Nota Paraná", "Trade"]:
+        y = "Renda extra"
+ 
+    elif x[:7] == "Resgate":
         y = "Renda extra"
  
     else:
         y = "Outro"
  
     return y
+#+end_src
 
+** Outubro
+
+*** Saldo anterior
+
+#+begin_src python :session :exports none :tangle yes
+nomemes = "outubro"
 saldo = 3472.72
 #+end_src
 
@@ -45,13 +66,13 @@ O saldo anterior nas contas bancárias é R$ src_python[:session]{saldo}
 *** Tabela de gastos e ingressos
 
 #+begin_src python :session :exports results :tangle yes
-outubro = pd.read_csv("outubro.csv")
-n = len(outubro)
+mes = pd.read_csv(nomemes + ".csv")
+n = len(mes)
 data = pd.Series(["2022-10-" for i in range(n)]) #prefixos para datas
-data = data.str.cat(outubro.Data.astype("string")) #data com prefixo mas ainda como string
-outubro.Data = data.astype("datetime64") #data como datetime64
-outubro = outubro.sort_values(by="Data")
-outubro
+data = data.str.cat(mes.Data.astype("string")) #data com prefixo mas ainda como string
+mes.Data = data.astype("datetime64") #data como datetime64
+mes = mes.sort_values(by="Data")
+mes
 #+end_src
 
 *** Classificação por forma de pagamento
@@ -63,14 +84,14 @@ outubro
 *Depósitos:* Ingressos de fontes diversas.
 
 #+begin_src python :session :exports results :tangle yes
-forma = outubro.groupby("Forma").sum() #Valor envolvido em cada forma de pagamento
+forma = mes.groupby("Forma").sum() #Valor envolvido em cada forma de pagamento
 forma
 #+end_src
 
 #+begin_src python :session :results file :exports results :tangle yes
 forma.plot(kind="bar", title="Valor por forma de pagamento", ylabel="R$", xlabel="", legend=False)
 plt.tick_params(labelrotation=0)
-fname = "outubro-forma.png"
+fname = nomemes + "-forma.png"
 plt.savefig(fname)
 plt.close()
 fname # retorna ao org
@@ -79,17 +100,27 @@ fname # retorna ao org
 *** Classificação dos gastos e ingressos
 
 #+begin_src python :session :exports results :tangle yes
-outubro["Classe"] = outubro.Descrição.apply(classe) #Aplica função classe à Descrição
-classifica = outubro.groupby(by="Classe").sum() #Valor envolvido em cada classe
+mes["Classe"] = mes.Descrição.apply(classe) #Aplica função classe à Descrição
+classifica = mes.groupby(by="Classe").sum() #Valor envolvido em cada classe
 classifica
 #+end_src
 
 #+begin_src python :session :results file :exports results :tangle yes
-classifica.drop(["Renda extra", "Fatura do cartão"]).plot(kind="barh", title="Valor gasto por classe", legend=False)
+classifica2 = classifica
+if "Fatura do cartão" in classifica.index:
+    classifica2 = classifica2.drop("Fatura do cartão")
+
+if "Renda extra" in classifica.index:
+    classifica2 = classifica2.drop("Renda extra")
+
+if "Salário" in classifica.index:
+    classifica2 = classifica2.drop("Salário")
+
+classifica2.plot(kind="barh", title="Valor gasto por classe", legend=False)
 plt.xlabel("R$")
 plt.ylabel("")
 plt.tight_layout()
-fname = "outubro-classe.png"
+fname = nomemes + "-classe.png"
 plt.savefig(fname)
 plt.close()
 fname
@@ -98,7 +129,14 @@ fname
 *** Saldo posterior
 
 #+begin_src python :session :exports none :tangle yes
-saldo = saldo + forma.Valor["Depósito"] - forma.Valor["Débito"]
+if "Depósito" in forma.index:
+    saldo += forma.Valor["Depósito"]
+
+if "Débito" in forma.index:
+    saldo -= forma.Valor["Débito"]
+
+if "Salário" in classifica.index:
+    saldo += classifica.Valor["Salário"]
 saldo
 #+end_src
 
