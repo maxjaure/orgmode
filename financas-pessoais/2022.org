@@ -9,6 +9,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from tabulate import tabulate
 def classe(x):
     if x in ["Açougue", "Mercado", "Padaria"]:
         y = "Açougue/Mercado/Padaria" # espaço em branco na linha em branco por bug do ob-python; senão dá erro de indentação
@@ -61,18 +62,20 @@ nomemes = "outubro"
 saldo = 3472.72
 #+end_src
 
-O saldo anterior nas contas bancárias é R$ src_python[:session]{saldo}
+O saldo anterior nas contas bancárias é R$ src_python[:session :results value raw]{saldo}
 
 *** Tabela de gastos e ingressos
 
-#+begin_src python :session :exports results :tangle yes
+#+begin_src python :session :results value raw :exports results :tangle yes
 mes = pd.read_csv(nomemes + ".csv")
 n = len(mes)
 data = pd.Series(["2022-10-" for i in range(n)]) #prefixos para datas
 data = data.str.cat(mes.Data.astype("string")) #data com prefixo mas ainda como string
 mes.Data = data.astype("datetime64") #data como datetime64
 mes = mes.sort_values(by="Data")
-mes
+mes2 = mes
+mes2.Data = mes2.Data.astype("string")
+tabulate(mes2,headers=mes2.columns,showindex=False,floatfmt=".2f",tablefmt="orgtbl")
 #+end_src
 
 *** Classificação por forma de pagamento
@@ -83,9 +86,9 @@ mes
 
 *Depósitos:* Ingressos de fontes diversas.
 
-#+begin_src python :session :exports results :tangle yes
+#+begin_src python :session :results value raw :exports results :tangle yes
 forma = mes.groupby("Forma").sum() #Valor envolvido em cada forma de pagamento
-forma
+tabulate(forma,headers=forma.columns,floatfmt=".2f",tablefmt="orgtbl")
 #+end_src
 
 #+begin_src python :session :results file :exports results :tangle yes
@@ -99,10 +102,10 @@ fname # retorna ao org
 
 *** Classificação dos gastos e ingressos
 
-#+begin_src python :session :exports results :tangle yes
+#+begin_src python :session :results value raw :exports results :tangle yes
 mes["Classe"] = mes.Descrição.apply(classe) #Aplica função classe à Descrição
 classifica = mes.groupby(by="Classe").sum() #Valor envolvido em cada classe
-classifica
+tabulate(classifica,headers=classifica.columns,floatfmt=".2f",tablefmt="orgtbl")
 #+end_src
 
 #+begin_src python :session :results file :exports results :tangle yes
@@ -140,10 +143,10 @@ if "Salário" in classifica.index:
 saldo
 #+end_src
 
-O saldo posterior nas contas bancárias é R$ src_python[:session]{saldo}
+O saldo posterior nas contas bancárias é R$ src_python[:session :results value raw]{format(saldo,".2f")}
 
-#+begin_src python :session :exports results :tangle yes
+#+begin_src python :session :results value raw :exports results :tangle yes
 if saldo<0:
-    alerta = "ATENÇÃO! Há gastos futuros que ainda precisam ser pagos."
+    alerta = "*ATENÇÃO!* Há gastos futuros que ainda precisam ser pagos."
     alerta
 #+end_src

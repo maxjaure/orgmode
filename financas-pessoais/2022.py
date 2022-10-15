@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from tabulate import tabulate
 def classe(x):
     if x in ["Açougue", "Mercado", "Padaria"]:
         y = "Açougue/Mercado/Padaria" # espaço em branco na linha em branco por bug do ob-python; senão dá erro de indentação
@@ -44,7 +45,7 @@ def classe(x):
     return y
 
 nomemes = "outubro"
-saldo = 6472.72 + 31.73
+saldo = 3472.72
 
 mes = pd.read_csv(nomemes + ".csv")
 n = len(mes)
@@ -52,10 +53,12 @@ data = pd.Series(["2022-10-" for i in range(n)]) #prefixos para datas
 data = data.str.cat(mes.Data.astype("string")) #data com prefixo mas ainda como string
 mes.Data = data.astype("datetime64") #data como datetime64
 mes = mes.sort_values(by="Data")
-mes
+mes2 = mes
+mes2.Data = mes2.Data.astype("string")
+tabulate(mes2,headers=mes2.columns,showindex=False,floatfmt=".2f",tablefmt="orgtbl")
 
 forma = mes.groupby("Forma").sum() #Valor envolvido em cada forma de pagamento
-forma
+tabulate(forma,headers=forma.columns,floatfmt=".2f",tablefmt="orgtbl")
 
 forma.plot(kind="bar", title="Valor por forma de pagamento", ylabel="R$", xlabel="", legend=False)
 plt.tick_params(labelrotation=0)
@@ -66,7 +69,7 @@ fname # retorna ao org
 
 mes["Classe"] = mes.Descrição.apply(classe) #Aplica função classe à Descrição
 classifica = mes.groupby(by="Classe").sum() #Valor envolvido em cada classe
-classifica
+tabulate(classifica,headers=classifica.columns,floatfmt=".2f",tablefmt="orgtbl")
 
 classifica2 = classifica
 if "Fatura do cartão" in classifica.index:
@@ -98,5 +101,5 @@ if "Salário" in classifica.index:
 saldo
 
 if saldo<0:
-    alerta = "ATENÇÃO! Há gastos futuros que ainda precisam ser pagos."
+    alerta = "*ATENÇÃO!* Há gastos futuros que ainda precisam ser pagos."
     alerta
